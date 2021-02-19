@@ -30,7 +30,7 @@ func Commit(msg string) {
 	u, _ := Username()
 	e, _ := Email()
 
-	commit, _ := w.Commit("example go-git commit", &git.CommitOptions{
+	commit, _ := w.Commit(msg, &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  u,
 			Email: e,
