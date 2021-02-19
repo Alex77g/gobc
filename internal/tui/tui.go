@@ -2,14 +2,15 @@ package tui
 
 import (
 	"errors"
-	"fmt"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/manifoldco/promptui"
 )
 
 // Run starts the terminal
-func Run() error {
+func Run() (string, error) {
 	t, _ := commitType()
 	s, _ := commitScope()
 	d, _ := commitDesc()
@@ -17,8 +18,7 @@ func Run() error {
 
 	c := t + ":" + s + d + te
 
-	fmt.Printf("final string %q\n", c)
-	return nil
+	return c, nil
 }
 
 func commitType() (string, error) {
@@ -40,7 +40,6 @@ func commitType() (string, error) {
 	s := strings.Split(result, ":")
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
 		return "", nil
 	}
 
@@ -60,7 +59,7 @@ func commitScope() (string, error) {
 	result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		log.Errorf("Prompt failed %v\n", err)
 		return "", nil
 	}
 
@@ -95,7 +94,7 @@ func commitDesc() (string, error) {
 	result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		log.Errorf("Prompt failed %v\n", err)
 		return "", err
 	}
 
@@ -111,7 +110,7 @@ func commitText() (string, error) {
 	result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		log.Errorf("Prompt failed %v\n", err)
 		return "", err
 	}
 
