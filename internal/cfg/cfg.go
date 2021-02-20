@@ -4,11 +4,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/gobc/internal/utils"
+	"github.com/gobc/internal/scm"
 )
 
 func LoadCfg() {
-	path, _ := utils.GitRoot()
+	path, _ := scm.GitRoot()
 
 	if _, err := os.Stat(path + "/.betterconfig"); err == nil {
 		log.Println("existiert")
