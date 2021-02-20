@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -15,6 +16,19 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
+
+func Push() {
+
+	path, _ := GitRoot()
+
+	r, err := git.PlainOpen(path)
+	CheckIfError(err)
+
+	log.Infoln("git push")
+	// push using default options
+	err = r.Push(&git.PushOptions{})
+	CheckIfError(err)
+}
 
 func Commit(msg string) {
 	path, _ := GitRoot()
@@ -137,4 +151,13 @@ var RepoNameRegexp = regexp.MustCompile(`.+/([^/]+)(\.git)?$`)
 func retrieveRepoName(url string) string {
 	matched := RepoNameRegexp.FindStringSubmatch(url)
 	return strings.TrimSuffix(matched[1], ".git")
+}
+
+func CheckIfError(err error) {
+	if err == nil {
+		return
+	}
+
+	log.Errorf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
+	os.Exit(1)
 }

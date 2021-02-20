@@ -5,6 +5,7 @@ import (
 	"os/signal"
 
 	"github.com/gobc/internal/cfg"
+	"github.com/gobc/internal/scm"
 	"github.com/gobc/internal/tui"
 	log "github.com/sirupsen/logrus"
 )
@@ -20,8 +21,15 @@ func main() {
 
 	go func() {
 		cfg.LoadCfg()
-		if err := tui.Run(); err != nil {
+		var to tui.Options
+		_, err := tui.Run(&to)
+		if err != nil {
 			log.Fatalf("Failed to accept incoming requests: %+v", err)
+		}
+		scm.Commit(to.CommitMsg)
+		if to.Push {
+			log.Println("push: ", to.Push)
+			scm.Push()
 		}
 		os.Exit(0)
 	}()

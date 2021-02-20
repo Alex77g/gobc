@@ -9,16 +9,22 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
+type Options struct {
+	CommitMsg string
+	Push      bool
+}
+
 // Run starts the terminal
-func Run() (string, error) {
+func Run(to *Options) (*Options, error) {
 	t, _ := commitType()
 	s, _ := commitScope()
 	d, _ := commitDesc()
 	te, _ := commitText()
+	to.Push = commitPush()
 
-	c := t + ":" + s + d + te
+	to.CommitMsg = t + ":" + s + d + te
 
-	return c, nil
+	return to, nil
 }
 
 func commitType() (string, error) {
@@ -115,4 +121,30 @@ func commitText() (string, error) {
 	}
 
 	return result, nil
+}
+
+func commitPush() bool {
+
+	prompt := promptui.Prompt{
+		Label:     "Push Commit?",
+		IsConfirm: true,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		return false
+	}
+
+	var ret bool
+	switch result {
+	case "y":
+		ret = true
+	case "n":
+		ret = false
+	default:
+		ret = true
+	}
+
+	return ret
 }
