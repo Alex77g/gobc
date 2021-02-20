@@ -15,6 +15,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
 func Push() {
@@ -24,9 +25,9 @@ func Push() {
 	r, err := git.PlainOpen(path)
 	CheckIfError(err)
 
-	log.Infoln("git push")
+	sshAuth, err := ssh.DefaultAuthBuilder("alex")
 	// push using default options
-	err = r.Push(&git.PushOptions{})
+	err = r.Push(&git.PushOptions{Auth: sshAuth})
 	CheckIfError(err)
 }
 

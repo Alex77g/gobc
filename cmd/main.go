@@ -28,7 +28,6 @@ func main() {
 		}
 		scm.Commit(to.CommitMsg)
 		if to.Push {
-			log.Println("push: ", to.Push)
 			scm.Push()
 		}
 		os.Exit(0)
