@@ -37,7 +37,7 @@ func Push() {
 		RemoteName: "main",
 		RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
 		Auth: &http.BasicAuth{
-			Username: "irrelevant",
+			Username: "alex77g",
 			Password: os.Getenv("GITHUB_TOKEN"),
 		},
 	})
