@@ -25,10 +25,10 @@ func Push() {
 
 	r, err := git.PlainOpen(path)
 	CheckIfError(err)
-
+	remote, _ := OriginURL()
 	// Push to github
 	err = r.Push(&git.PushOptions{
-		RemoteName: "main",
+		RemoteName: remote,
 		RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
 		Auth: &http.BasicAuth{
 			Username: "alex77g",
