@@ -14,7 +14,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
@@ -29,6 +31,19 @@ func Push() {
 	// push using default options
 	err = r.Push(&git.PushOptions{Auth: sshAuth})
 	CheckIfError(err)
+
+	// Push to github
+	err = r.Push(&git.PushOptions{
+		RemoteName: "main",
+		RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+		Auth: &http.BasicAuth{
+			Username: "irrelevant",
+			Password: os.Getenv("GITHUB_TOKEN"),
+		},
+	})
+	if err != nil {
+		// return err
+	}
 }
 
 func Commit(msg string) {
