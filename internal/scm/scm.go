@@ -17,7 +17,6 @@ import (
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
 func Push() {
@@ -25,11 +24,6 @@ func Push() {
 	path, _ := GitRoot()
 
 	r, err := git.PlainOpen(path)
-	CheckIfError(err)
-
-	sshAuth, err := ssh.DefaultAuthBuilder("alex")
-	// push using default options
-	err = r.Push(&git.PushOptions{Auth: sshAuth})
 	CheckIfError(err)
 
 	// Push to github
@@ -41,9 +35,8 @@ func Push() {
 			Password: os.Getenv("GITHUB_TOKEN"),
 		},
 	})
-	if err != nil {
-		// return err
-	}
+
+	CheckIfError(err)
 }
 
 func Commit(msg string) {
