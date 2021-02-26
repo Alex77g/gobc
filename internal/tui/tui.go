@@ -15,15 +15,15 @@ type Options struct {
 }
 
 // Run starts the terminal
-func Run(to *Options) (*Options, error) {
+func Run(to *Options, stagedFiles []string) (*Options, error) {
 	t, _ := commitType()
-	s, _ := commitScope()
+	s, _ := commitScope(stagedFiles)
 	d, _ := commitDesc()
 	te, _ := commitText()
 	to.Push = commitPush()
 
 	to.CommitMsg = t + ":" + s + d + te
-
+	// to.CommitMsg = t
 	return to, nil
 }
 
@@ -52,14 +52,26 @@ func commitType() (string, error) {
 	return s[0], nil
 }
 
-func commitScope() (string, error) {
+func commitScope(stagedFiles []string) (string, error) {
 	validate := func(input string) error {
 		return nil
+	}
+
+	var f string
+	if len(stagedFiles) <= 2 {
+		for i, v := range stagedFiles {
+			if i == 0 {
+				f = v
+			} else {
+				f = f + ", " + v
+			}
+		}
 	}
 
 	prompt := promptui.Prompt{
 		Label:    "What is the scope of this change (e.g. component or file name): (press enter to skip)",
 		Validate: validate,
+		Default:  f,
 	}
 
 	result, err := prompt.Run()
