@@ -29,7 +29,8 @@ type Parameter struct {
 		} `yaml:"versionHandling"`
 	} `yaml:"gitflow"`
 	Jira struct {
-		Enable bool `yaml:"enable"`
+		Enable bool   `yaml:"enable"`
+		URL    string `yaml:"url"`
 		Issue  struct {
 			User   string   `yaml:"user"`
 			Status []string `yaml:"status"`
