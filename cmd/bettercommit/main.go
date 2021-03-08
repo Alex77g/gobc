@@ -5,6 +5,7 @@ import (
 	"os/signal"
 
 	"github.com/gobc/internal/cfg"
+	"github.com/gobc/internal/jira"
 	"github.com/gobc/internal/scm"
 	"github.com/gobc/internal/tui"
 	log "github.com/sirupsen/logrus"
@@ -38,26 +39,32 @@ func main() {
 	signal.Notify(shutdown, os.Kill)
 
 	go func() {
-		cfg.LoadCfg()
-		var to tui.Options
+		p := cfg.LoadCfg()
+		var jiraNumbers []string
+		if p.Jira.Enable {
+			issues := jira.Issues(p)
+			for _, v := range issues.Issues {
+				jiraNumbers = append(jiraNumbers, v.Key)
+			}
+		}
 		stagedFiles, err := scm.StagedFiles()
 		if err != nil {
 			log.Fatalf("Failed to accept incoming requests: %+v", err)
 		}
-		_, err = tui.Run(&to, stagedFiles)
+		var to tui.Options
+		_, err = tui.Run(&to, stagedFiles, jiraNumbers)
 		if err != nil {
 			log.Fatalf("Failed to accept incoming requests: %+v", err)
 		}
-
-		// scm.CheckCommit([]string("diff","--exit-code"))
+		log.Debugf("test commit msg: %s", to.CommitMsg)
 		if len(to.CommitMsg) >= 9 {
 			scm.Commit(to.CommitMsg)
+
+			if to.Push {
+				scm.Push()
+			}
 		} else {
 			log.Infoln("commit skipped")
-		}
-
-		if to.Push {
-			scm.Push()
 		}
 		os.Exit(0)
 	}()

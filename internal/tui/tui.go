@@ -2,6 +2,7 @@ package tui
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -15,16 +16,17 @@ type Options struct {
 }
 
 // Run starts the terminal
-func Run(to *Options, stagedFiles []string) (*Options, error) {
-	t, _ := commitType()
-	s, _ := commitScope(stagedFiles)
-	d, _ := commitDesc()
-	te, _ := commitText()
+func Run(to *Options, stagedFiles, jiraNumbers []string) (*Options, error) {
+	t, err := commitType()
+	s, err := commitScope(stagedFiles)
+	m, err := multiSelect(jiraNumbers)
+	d, err := commitDesc()
+	te, err := commitText()
+
+	to.CommitMsg = t + ":" + s + m + d + te
 	to.Push = commitPush()
 
-	to.CommitMsg = t + ":" + s + d + te
-	// to.CommitMsg = t
-	return to, nil
+	return to, err
 }
 
 func commitType() (string, error) {
@@ -159,4 +161,28 @@ func commitPush() bool {
 	}
 
 	return ret
+}
+
+func multiSelect(items []string) (string, error) {
+	var result string
+	var err error
+	items = append(items, "Exit")
+
+	prompt := promptui.Select{
+		Label: "Choose a Jira ticketnumber",
+		Items: items,
+	}
+
+	_, result, err = prompt.Run()
+
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return "", err
+	}
+
+	if result == "Exit" {
+		return "", nil
+	}
+
+	return result + " ", nil
 }

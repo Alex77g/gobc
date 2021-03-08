@@ -10,20 +10,49 @@ import (
 	"github.com/gobc/internal/scm"
 )
 
-type option struct {
-	github struct {
-		enable bool   `yaml:"enable"`
-		auth   string `yaml:"auth"`
-	}
-	gitlab struct {
-		enable bool   `yaml:"enable"`
-		auth   string `yaml:"auth"`
-	}
+type Parameter struct {
+	Github struct {
+		Enable bool   `yaml:"enable"`
+		Auth   string `yaml:"auth"`
+		User   string `yaml:"user"`
+	} `yaml:"github"`
+	Gitlab struct {
+		Enable bool   `yaml:"enable"`
+		Auth   string `yaml:"auth"`
+		User   string `yaml:"user"`
+	} `yaml:"gitlab"`
+	Gitflow struct {
+		Enable          bool `yaml:"enable"`
+		VersionHandling struct {
+			Enable bool   `yaml:"enable"`
+			Tag    string `yaml:"tag"`
+		} `yaml:"versionHandling"`
+	} `yaml:"gitflow"`
+	Jira struct {
+		Enable bool `yaml:"enable"`
+		Issue  struct {
+			User   string   `yaml:"user"`
+			Status []string `yaml:"status"`
+		} `yaml:"issue"`
+		Auth struct {
+			User     string `yaml:"user"`
+			Password string `yaml:"password"`
+		} `yaml:"auth"`
+	} `yaml:"jira"`
+	Bitbucket struct {
+		Enable bool `yaml:"enable"`
+	} `yaml:"bitbucket"`
+	Githooks struct {
+		Enable bool `yaml:"enable"`
+	} `yaml:"githooks"`
+	Timetracker struct {
+		Enable bool `yaml:"enable"`
+	} `yaml:"timetracker"`
 }
 
-func LoadCfg() {
+func LoadCfg() Parameter {
 
-	o := option{}
+	o := Parameter{}
 	path, _ := scm.GitRoot()
 
 	if _, err := os.Stat(path + ".betterconfig"); err == nil {
@@ -44,5 +73,7 @@ func LoadCfg() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	log.Debugf("%+v", o)
+	log.Debugf("cfg line 47 %+v", o)
+
+	return o
 }

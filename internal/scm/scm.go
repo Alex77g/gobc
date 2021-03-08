@@ -11,30 +11,34 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-git/go-git/v5/plumbing"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
 func Push() {
 
-	path, _ := GitRoot()
+	// token, _ := viper.Get("GITUB_TOKEN").(string)
+	// user, _ := viper.Get("GITUB_USER").(string)
+	// auth := &http.BasicAuth{Username: user, Password: token}
 
-	r, err := git.PlainOpen(path)
-	CheckIfError(err)
-	// Push to github
-	err = r.Push(&git.PushOptions{
-		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
-		Auth: &http.BasicAuth{
-			Username: "alex77g",
-			Password: os.Getenv("GITHUB_TOKEN"),
-		},
-	})
+	// path, _ := GitRoot()
 
-	CheckIfError(err)
+	// r, err := git.PlainOpen(path)
+	// CheckIfError(err)
+	// // Push to github
+	// err = r.Push(&git.PushOptions{
+	// 	RemoteName: "origin",
+	// 	RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+	// 	Force:      true,
+	// 	Auth:       auth,
+	// })
+
+	// CheckIfError(err)
+	execGitPush()
 }
 
 func Commit(msg string) {
@@ -45,7 +49,7 @@ func Commit(msg string) {
 
 	status, _ := w.Status()
 
-	log.Println(status)
+	log.Debugln(status)
 
 	// extract user and mail from gitconf global
 	u, _ := Username()
@@ -153,6 +157,53 @@ func execGitConfig(args ...string) (string, error) {
 	return strings.TrimRight(stdout.String(), "\000"), nil
 }
 
+func StagedFiles() ([]string, error) {
+	f, err := execGitDiff("--name-only", "--cached")
+	files := strings.Fields(f)
+
+	return files, err
+}
+
+func execGitDiff(args ...string) (string, error) {
+	gitArgs := append([]string{"diff"}, args...)
+	var stdout bytes.Buffer
+	cmd := exec.Command("git", gitArgs...)
+	cmd.Stdout = &stdout
+	cmd.Stderr = ioutil.Discard
+
+	err := cmd.Run()
+	if exitError, ok := err.(*exec.ExitError); ok {
+		if waitStatus, ok := exitError.Sys().(syscall.WaitStatus); ok {
+			if waitStatus.ExitStatus() == 1 {
+				return "", &ErrNotFound{Key: args[len(args)-1]}
+			}
+		}
+		return "", err
+	}
+
+	return strings.TrimRight(stdout.String(), "\000"), nil
+}
+
+func execGitPush(args ...string) (string, error) {
+	gitArgs := append([]string{"push"}, args...)
+	var stdout bytes.Buffer
+	cmd := exec.Command("git", gitArgs...)
+	cmd.Stdout = &stdout
+	cmd.Stderr = ioutil.Discard
+
+	err := cmd.Run()
+	if exitError, ok := err.(*exec.ExitError); ok {
+		if waitStatus, ok := exitError.Sys().(syscall.WaitStatus); ok {
+			if waitStatus.ExitStatus() == 1 {
+				return "", &ErrNotFound{Key: args[len(args)-1]}
+			}
+		}
+		return "", err
+	}
+
+	return strings.TrimRight(stdout.String(), "\000"), nil
+}
+
 var RepoNameRegexp = regexp.MustCompile(`.+/([^/]+)(\.git)?$`)
 
 func retrieveRepoName(url string) string {
@@ -167,4 +218,41 @@ func CheckIfError(err error) {
 
 	log.Errorf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
 	os.Exit(1)
+}
+
+func CheckoutBranch(repository *git.Repository, branchName string) error {
+	//
+	//err = fetch(repository)
+	//if err != nil {
+	//	return err
+	//}
+
+	localBranchLookup, err := repository.Branch(branchName)
+	if err != nil {
+		fmt.Println("Branch is not yet local, trying to fetch from remoteName")
+		remoteName := "origin"
+		var remoteRef = plumbing.NewRemoteReferenceName(remoteName, branchName)
+		var ref, err = repository.Reference(remoteRef, true)
+		if err != nil {
+			return err
+		}
+
+		var mergeRef = plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branchName))
+		err = repository.CreateBranch(&config.Branch{Name: branchName, Remote: remoteName, Merge: mergeRef})
+		if err != nil {
+			return err
+		}
+		var localRef = plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branchName))
+		return repository.Storer.SetReference(plumbing.NewHashReference(localRef, ref.Hash()))
+	} else {
+		localBranchRef := localBranchLookup.Merge
+		worktree, err := repository.Worktree()
+		if err != nil {
+			return err
+		}
+
+		// Keep: true is important for performance reasons, to avoid vendor/github.com/go-git/go-git/v5/worktree.go:409
+		// being called by reset, taking 10 seconds and more
+		return worktree.Checkout(&git.CheckoutOptions{Branch: localBranchRef, Keep: true})
+	}
 }
