@@ -56,10 +56,10 @@ func LoadCfg() Parameter {
 	o := Parameter{}
 	path, _ := scm.GitRoot()
 
-	if _, err := os.Stat(path + ".betterconfig"); err == nil {
-		log.Debugln(".betterconfig existiert")
+	if _, err := os.Stat(path + ".betterconfig.yml"); err == nil {
+		log.Debugln(".betterconfig.yml existiert")
 	} else if os.IsNotExist(err) {
-		log.Debugln(".betterconfig existiert nicht")
+		log.Debugln(".betterconfig.yml existiert nicht")
 	} else {
 		// Schrodinger: file may or may not exist. See err for details.
 		log.Debugln("existiert oder ?")

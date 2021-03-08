@@ -44,7 +44,7 @@ func main() {
 		if p.Jira.Enable {
 			issues := jira.Issues(p)
 			for _, v := range issues.Issues {
-				jiraNumbers = append(jiraNumbers, v.Key)
+				jiraNumbers = append(jiraNumbers, v.Key+" ("+v.Fields.Summary+")")
 			}
 		}
 		stagedFiles, err := scm.StagedFiles()

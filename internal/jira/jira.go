@@ -68,7 +68,7 @@ func init() {
 func Issues(p cfg.Parameter) JiraIssue {
 	var issues JiraIssue
 	url := p.Jira.URL + "/rest/api/2/search?jql=project=KUB&fields=summary,assignee,status"
-	log.Printf("%s", url)
+	log.Debugf("%s", url)
 	resp := httpReq(nil, url, http.MethodGet, p)
 
 	err := json.Unmarshal(resp, &issues)
