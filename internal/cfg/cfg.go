@@ -57,9 +57,9 @@ func LoadCfg() Parameter {
 	path, _ := scm.GitRoot()
 
 	if _, err := os.Stat(path + ".betterconfig.yml"); err == nil {
-		log.Debugln(".betterconfig.yml existiert")
+		log.Debugln(".betterconfig.yml exists")
 	} else if os.IsNotExist(err) {
-		log.Debugln(".betterconfig.yml existiert nicht")
+		log.Errorf(".betterconfig.yml not exists: %s", err)
 	} else {
 		// Schrodinger: file may or may not exist. See err for details.
 		log.Debugln("existiert oder ?")
@@ -74,7 +74,7 @@ func LoadCfg() Parameter {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	log.Debugf("cfg line 47 %+v", o)
+	log.Debugf("Configfile content: %+v", o)
 
 	return o
 }
