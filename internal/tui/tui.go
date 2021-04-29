@@ -2,7 +2,6 @@ package tui
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -39,7 +38,7 @@ func Run(to *Options, stagedFiles, jiraNumbers []string) (*Options, error) {
 	}
 
 	to.CommitMsg = t + ":" + s + m + d + te
-	to.Push, err = commitPush()
+	to.Push = commitPush()
 
 	return to, err
 }
@@ -152,18 +151,14 @@ func commitText() (string, error) {
 	return result, nil
 }
 
-func commitPush() (bool, error) {
+func commitPush() bool {
 
 	prompt := promptui.Prompt{
 		Label:     "Push Commit?",
 		IsConfirm: true,
 	}
 
-	result, err := prompt.Run()
-
-	if err != nil {
-		return false, err
-	}
+	result, _ := prompt.Run()
 
 	var ret bool
 	switch strings.ToLower(result) {
@@ -175,7 +170,7 @@ func commitPush() (bool, error) {
 		ret = true
 	}
 
-	return ret, nil
+	return ret
 }
 
 func multiSelect(items []string) (string, error) {
@@ -191,7 +186,6 @@ func multiSelect(items []string) (string, error) {
 	_, result, err = prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
 		return "", err
 	}
 
