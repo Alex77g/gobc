@@ -18,13 +18,28 @@ type Options struct {
 // Run starts the terminal
 func Run(to *Options, stagedFiles, jiraNumbers []string) (*Options, error) {
 	t, err := commitType()
+	if err != nil {
+		return to, err
+	}
 	s, err := commitScope(stagedFiles)
+	if err != nil {
+		return to, err
+	}
 	m, err := multiSelect(jiraNumbers)
+	if err != nil {
+		return to, err
+	}
 	d, err := commitDesc()
+	if err != nil {
+		return to, err
+	}
 	te, err := commitText()
+	if err != nil {
+		return to, err
+	}
 
 	to.CommitMsg = t + ":" + s + m + d + te
-	to.Push = commitPush()
+	to.Push, err = commitPush()
 
 	return to, err
 }
@@ -48,7 +63,7 @@ func commitType() (string, error) {
 	s := strings.Split(result, ":")
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return s[0], nil
@@ -80,11 +95,11 @@ func commitScope(stagedFiles []string) (string, error) {
 
 	if err != nil {
 		log.Errorf("Prompt failed %v\n", err)
-		return "", nil
+		return "", err
 	}
 
 	if len(result) == 0 {
-		return "", nil
+		return "", errors.New("no string given")
 	}
 
 	return "(" + result + ")", nil
@@ -137,7 +152,7 @@ func commitText() (string, error) {
 	return result, nil
 }
 
-func commitPush() bool {
+func commitPush() (bool, error) {
 
 	prompt := promptui.Prompt{
 		Label:     "Push Commit?",
@@ -147,7 +162,7 @@ func commitPush() bool {
 	result, err := prompt.Run()
 
 	if err != nil {
-		return false
+		return false, err
 	}
 
 	var ret bool
@@ -160,7 +175,7 @@ func commitPush() bool {
 		ret = true
 	}
 
-	return ret
+	return ret, nil
 }
 
 func multiSelect(items []string) (string, error) {
