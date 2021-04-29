@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"os/signal"
 
 	"github.com/gobc/internal/cfg"
 	"github.com/gobc/internal/jira"
@@ -33,44 +32,34 @@ func main() {
 
 	log.Info("bettercommit starting ...")
 
-	shutdown := make(chan os.Signal, 1)
-
-	signal.Notify(shutdown, os.Interrupt)
-	signal.Notify(shutdown, os.Kill)
-
-	go func() {
-		p := cfg.LoadCfg()
-		var jiraNumbers []string
-		if p.Jira.Enable {
-			issues := jira.Issues(p)
-			for _, v := range issues.Issues {
-				jiraNumbers = append(jiraNumbers, v.Key+" ("+v.Fields.Summary+")")
-			}
+	p := cfg.LoadCfg()
+	var jiraNumbers []string
+	if p.Jira.Enable {
+		issues := jira.Issues(p)
+		for _, v := range issues.Issues {
+			jiraNumbers = append(jiraNumbers, v.Key+" ("+v.Fields.Summary+")")
 		}
-		stagedFiles, err := scm.StagedFiles()
-		if err != nil {
-			log.Fatalf("Failed to accept incoming requests: %+v", err)
-		}
-		var to tui.Options
-		_, err = tui.Run(&to, stagedFiles, jiraNumbers)
-		if err != nil {
-			log.Fatalf("Failed to accept incoming requests: %+v", err)
-		}
-		log.Debugf("test commit msg: %s", to.CommitMsg)
-		if len(to.CommitMsg) >= 9 {
-			scm.Commit(to.CommitMsg)
+	}
+	stagedFiles, err := scm.StagedFiles()
+	if err != nil {
+		log.Fatalf("Failed to accept incoming requests: %+v", err)
+	}
+	var to tui.Options
+	_, err = tui.Run(&to, stagedFiles, jiraNumbers)
+	if err != nil {
+		log.Fatalf("Failed to accept incoming requests: %+v", err)
+	}
+	log.Debugf("test commit msg: %s", to.CommitMsg)
+	if len(to.CommitMsg) >= 9 {
+		scm.Commit(to.CommitMsg)
 
-			if to.Push {
-				scm.Push()
-			}
-		} else {
-			log.Infoln("commit skipped")
+		if to.Push {
+			scm.Push()
 		}
-		os.Exit(0)
-	}()
+	} else {
+		log.Infoln("commit skipped")
+	}
 
-	<-shutdown
-
-	log.Info("Initiate graceful shutdown here")
+	log.Info("Initiate shutdown ........")
 	os.Exit(0)
 }
