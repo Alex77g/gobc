@@ -11,6 +11,7 @@ import (
 
 	"github.com/gobc/internal/cfg"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type JiraIssue struct {
@@ -84,7 +85,7 @@ func sortIssues(i JiraIssue, p cfg.Parameter) JiraIssue {
 	var sortedIssues JiraIssue
 
 	for _, j := range i.Issues {
-		if j.Fields.Assignee.DisplayName == p.Jira.Issue.User {
+		if j.Fields.Assignee.DisplayName == p.Jira.Issue.UserName {
 			for _, k := range p.Jira.Issue.Status {
 				if k == j.Fields.Status.Name {
 					sortedIssues.Issues = append(sortedIssues.Issues, j)
@@ -116,7 +117,7 @@ func httpReq(i interface{}, url, httpMethod string, p cfg.Parameter) []byte {
 
 	req, err := http.NewRequestWithContext(ctx, httpMethod, url, bytes.NewBuffer(jsn))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.SetBasicAuth(p.Jira.Auth.User, p.Jira.Auth.Password)
+	req.SetBasicAuth(viper.Get("JIRA_USER").(string), viper.Get("JIRA_TOKEN").(string))
 
 	if err != nil {
 		log.Fatalf("Cannot create request: %s\n", err)
