@@ -20,24 +20,6 @@ import (
 )
 
 func Push() {
-
-	// token, _ := viper.Get("GITUB_TOKEN").(string)
-	// user, _ := viper.Get("GITUB_USER").(string)
-	// auth := &http.BasicAuth{Username: user, Password: token}
-
-	// path, _ := GitRoot()
-
-	// r, err := git.PlainOpen(path)
-	// CheckIfError(err)
-	// // Push to github
-	// err = r.Push(&git.PushOptions{
-	// 	RemoteName: "origin",
-	// 	RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
-	// 	Force:      true,
-	// 	Auth:       auth,
-	// })
-
-	// CheckIfError(err)
 	execGitPush()
 }
 
