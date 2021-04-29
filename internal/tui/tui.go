@@ -166,7 +166,7 @@ func commitPush() (bool, error) {
 	}
 
 	var ret bool
-	switch result {
+	switch strings.ToLower(result) {
 	case "y":
 		ret = true
 	case "n":
