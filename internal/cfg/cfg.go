@@ -14,7 +14,6 @@ type Parameter struct {
 	Github struct {
 		Enable bool   `yaml:"enable"`
 		Auth   string `yaml:"auth"`
-		User   string `yaml:"user"`
 	} `yaml:"github"`
 	Gitlab struct {
 		Enable bool   `yaml:"enable"`
@@ -32,13 +31,10 @@ type Parameter struct {
 		Enable bool   `yaml:"enable"`
 		URL    string `yaml:"url"`
 		Issue  struct {
-			User   string   `yaml:"user"`
-			Status []string `yaml:"status"`
+			UserName string   `yaml:"userName"`
+			Status   []string `yaml:"status"`
 		} `yaml:"issue"`
-		Auth struct {
-			User     string `yaml:"user"`
-			Password string `yaml:"password"`
-		} `yaml:"auth"`
+		Auth string `yaml:"auth"`
 	} `yaml:"jira"`
 	Bitbucket struct {
 		Enable bool `yaml:"enable"`
