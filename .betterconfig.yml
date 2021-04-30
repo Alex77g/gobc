@@ -1,0 +1,31 @@
+github:
+  enable: true
+  auth: basic #basic/ssh
+  # get user and token from global git config
+gitlab:
+  enable: false
+  auth: basic #basic/ssh
+  user: username
+gitflow:
+  enable: true
+  versionHandling:
+    enable: true
+    tag: "v"
+jira:
+  enable: true
+  url: "https://kubernauts.atlassian.net"
+  issue:
+    userName: "Alexander Giesa"
+    status: 
+      - "In Arbeit"
+      - "ToReview"
+  auth: basic
+  # provide user and token as environment variables
+  # JIRA_USER
+  # JIRA_TOKEN
+bitbucket:
+  enable: false
+githooks:
+  enable: false
+timetracker:
+  enable: false
