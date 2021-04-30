@@ -11,7 +11,6 @@ import (
 
 	"github.com/gobc/internal/cfg"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 type JiraIssue struct {
@@ -66,11 +65,11 @@ func init() {
 
 }
 
-func Issues(p cfg.Parameter) JiraIssue {
+func Issues(p cfg.Parameter, user, token string) JiraIssue {
 	var issues JiraIssue
 	url := p.Jira.URL + "/rest/api/2/search?jql=project=KUB&fields=summary,assignee,status"
 	log.Debugf("%s", url)
-	resp := httpReq(nil, url, http.MethodGet, p)
+	resp := httpReq(nil, p, url, http.MethodGet, user, token)
 
 	err := json.Unmarshal(resp, &issues)
 	if err != nil {
@@ -96,7 +95,7 @@ func sortIssues(i JiraIssue, p cfg.Parameter) JiraIssue {
 	return sortedIssues
 }
 
-func httpReq(i interface{}, url, httpMethod string, p cfg.Parameter) []byte {
+func httpReq(i interface{}, p cfg.Parameter, url, httpMethod, user, token string) []byte {
 
 	const ConnectMaxWaitTime = 1 * time.Second
 	const RequestMaxWaitTime = 5 * time.Second
@@ -117,7 +116,7 @@ func httpReq(i interface{}, url, httpMethod string, p cfg.Parameter) []byte {
 
 	req, err := http.NewRequestWithContext(ctx, httpMethod, url, bytes.NewBuffer(jsn))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.SetBasicAuth(viper.Get("JIRA_USER").(string), viper.Get("JIRA_TOKEN").(string))
+	req.SetBasicAuth(user, token)
 
 	if err != nil {
 		log.Fatalf("Cannot create request: %s\n", err)

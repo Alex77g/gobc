@@ -16,6 +16,8 @@ func init() {
 }
 
 func main() {
+	jirauser := os.Getenv("JIRA_USER")
+	jiratoken := os.Getenv("JIRA_TOKEN")
 
 	if _, err := os.Stat(".git"); err != nil {
 		if os.IsNotExist(err) {
@@ -35,7 +37,7 @@ func main() {
 	p := cfg.LoadCfg()
 	var jiraNumbers []string
 	if p.Jira.Enable {
-		issues := jira.Issues(p)
+		issues := jira.Issues(p, jirauser, jiratoken)
 		for _, v := range issues.Issues {
 			jiraNumbers = append(jiraNumbers, v.Key+" ("+v.Fields.Summary+")")
 		}
