@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.InfoLevel)
 }
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Errorln("Viper error: ", err)
+		log.Errorf("Viper error: %s \n", err)
 	}
 
 	log.Info("bettercommit starting ...")
@@ -44,14 +44,14 @@ func main() {
 	}
 	stagedFiles, err := scm.StagedFiles()
 	if err != nil {
-		log.Fatalf("Failed to accept incoming requests: %+v", err)
+		log.Fatalf("No staged files given: %+v", err)
 	}
 	var to tui.Options
 	_, err = tui.Run(&to, stagedFiles, jiraNumbers)
 	if err != nil {
-		log.Fatalf("Failed to accept incoming requests: %+v", err)
+		log.Fatalf("Failed to load prompt menu: %+v", err)
 	}
-	log.Debugf("test commit msg: %s", to.CommitMsg)
+
 	if len(to.CommitMsg) >= 9 {
 		scm.Commit(to.CommitMsg)
 
